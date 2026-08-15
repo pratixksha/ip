@@ -46,13 +46,43 @@ public class Shrek {
                 System.out.println("     OK, I've marked this task as not done yet:");
                 System.out.println("       " + tasks[index]);
                 System.out.println(separator);
+            } else if (input.startsWith("todo ")) {
+                String description = input.substring(5).trim();
+                tasks[taskCount] = new Todo(description);
+                taskCount++;
+                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+            } else if (input.startsWith("deadline ")) {
+                String rest = input.substring(9).trim();
+                String[] parts = rest.split("/by", 2);
+                String description = parts[0].trim();
+                String by = parts[1].trim();
+                tasks[taskCount] = new Deadline(description, by);
+                taskCount++;
+                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+            } else if (input.startsWith("event ")) {
+                String rest = input.substring(6).trim();
+                String[] fromSplit = rest.split("/from", 2);
+                String description = fromSplit[0].trim();
+                String[] toSplit = fromSplit[1].split("/to", 2);
+                String from = toSplit[0].trim();
+                String to = toSplit[1].trim();
+                tasks[taskCount] = new Event(description, from, to);
+                taskCount++;
+                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
             } else {
-                tasks[taskCount] = new Task(input);
+                tasks[taskCount] = new Todo(input);
                 taskCount++;
                 System.out.println("     added: " + input);
                 System.out.println(separator);
             }
         }
         scanner.close();
+    }
+
+    private static void printAddedMessage(Task task, int taskCount, String separator) {
+        System.out.println("     Got it. I've added this task:");
+        System.out.println("       " + task);
+        System.out.println("     Now you have " + taskCount + " tasks in the list.");
+        System.out.println(separator);
     }
 }
