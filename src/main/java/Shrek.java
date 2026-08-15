@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -19,8 +20,7 @@ public class Shrek {
         System.out.println("     What can I do for you?");
         System.out.println(separator);
 
-        Task[] tasks = new Task[100];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -32,30 +32,37 @@ public class Shrek {
                     break;
                 } else if (input.equals("list")) {
                     System.out.println("     Here are the tasks in your list:");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println("     " + (i + 1) + "." + tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println("     " + (i + 1) + "." + tasks.get(i));
                     }
                     System.out.println(separator);
                 } else if (input.equals("mark") || input.startsWith("mark ")) {
-                    int index = parseTaskIndex(input, "mark", taskCount);
-                    tasks[index].markAsDone();
+                    int index = parseTaskIndex(input, "mark", tasks.size());
+                    tasks.get(index).markAsDone();
                     System.out.println("     Nice! I've marked this task as done:");
-                    System.out.println("       " + tasks[index]);
+                    System.out.println("       " + tasks.get(index));
                     System.out.println(separator);
                 } else if (input.equals("unmark") || input.startsWith("unmark ")) {
-                    int index = parseTaskIndex(input, "unmark", taskCount);
-                    tasks[index].markAsNotDone();
+                    int index = parseTaskIndex(input, "unmark", tasks.size());
+                    tasks.get(index).markAsNotDone();
                     System.out.println("     OK, I've marked this task as not done yet:");
-                    System.out.println("       " + tasks[index]);
+                    System.out.println("       " + tasks.get(index));
+                    System.out.println(separator);
+                } else if (input.equals("delete") || input.startsWith("delete ")) {
+                    int index = parseTaskIndex(input, "delete", tasks.size());
+                    Task removed = tasks.remove(index);
+                    System.out.println("     Noted. I've removed this task:");
+                    System.out.println("       " + removed);
+                    System.out.println("     Now you have " + tasks.size() + " tasks in the list.");
                     System.out.println(separator);
                 } else if (input.equals("todo") || input.startsWith("todo ")) {
                     String description = input.length() > 4 ? input.substring(4).trim() : "";
                     if (description.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of a todo cannot be empty.");
                     }
-                    tasks[taskCount] = new Todo(description);
-                    taskCount++;
-                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                    Task newTask = new Todo(description);
+                    tasks.add(newTask);
+                    printAddedMessage(newTask, tasks.size(), separator);
                 } else if (input.equals("deadline") || input.startsWith("deadline ")) {
                     String rest = input.length() > 8 ? input.substring(8).trim() : "";
                     if (rest.isEmpty()) {
@@ -74,9 +81,9 @@ public class Shrek {
                     if (by.isEmpty()) {
                         throw new ShrekException("OOPS!!! The due date/time of a deadline cannot be empty.");
                     }
-                    tasks[taskCount] = new Deadline(description, by);
-                    taskCount++;
-                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                    Task newTask = new Deadline(description, by);
+                    tasks.add(newTask);
+                    printAddedMessage(newTask, tasks.size(), separator);
                 } else if (input.equals("event") || input.startsWith("event ")) {
                     String rest = input.length() > 5 ? input.substring(5).trim() : "";
                     if (rest.isEmpty()) {
@@ -104,9 +111,9 @@ public class Shrek {
                     if (to.isEmpty()) {
                         throw new ShrekException("OOPS!!! The end date/time of an event cannot be empty.");
                     }
-                    tasks[taskCount] = new Event(description, from, to);
-                    taskCount++;
-                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                    Task newTask = new Event(description, from, to);
+                    tasks.add(newTask);
+                    printAddedMessage(newTask, tasks.size(), separator);
                 } else {
                     throw new ShrekException("OOPS!!! I'm sorry, but I don't know what that means :-(");
                 }
