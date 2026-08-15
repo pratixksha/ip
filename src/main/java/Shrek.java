@@ -25,58 +25,115 @@ public class Shrek {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String input = scanner.nextLine();
-            if (input.equals("bye")) {
-                System.out.println("     Bye. Hope to see you again soon!");
-                System.out.println(separator);
-                break;
-            } else if (input.equals("list")) {
-                for (int i = 0; i < taskCount; i++) {
-                    System.out.println("     " + (i + 1) + ". " + tasks[i]);
+            try {
+                if (input.equals("bye")) {
+                    System.out.println("     Bye. Hope to see you again soon!");
+                    System.out.println(separator);
+                    break;
+                } else if (input.equals("list")) {
+                    System.out.println("     Here are the tasks in your list:");
+                    for (int i = 0; i < taskCount; i++) {
+                        System.out.println("     " + (i + 1) + "." + tasks[i]);
+                    }
+                    System.out.println(separator);
+                } else if (input.equals("mark") || input.startsWith("mark ")) {
+                    int index = parseTaskIndex(input, "mark", taskCount);
+                    tasks[index].markAsDone();
+                    System.out.println("     Nice! I've marked this task as done:");
+                    System.out.println("       " + tasks[index]);
+                    System.out.println(separator);
+                } else if (input.equals("unmark") || input.startsWith("unmark ")) {
+                    int index = parseTaskIndex(input, "unmark", taskCount);
+                    tasks[index].markAsNotDone();
+                    System.out.println("     OK, I've marked this task as not done yet:");
+                    System.out.println("       " + tasks[index]);
+                    System.out.println(separator);
+                } else if (input.equals("todo") || input.startsWith("todo ")) {
+                    String description = input.length() > 4 ? input.substring(4).trim() : "";
+                    if (description.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The description of a todo cannot be empty.");
+                    }
+                    tasks[taskCount] = new Todo(description);
+                    taskCount++;
+                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                } else if (input.equals("deadline") || input.startsWith("deadline ")) {
+                    String rest = input.length() > 8 ? input.substring(8).trim() : "";
+                    if (rest.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
+                    }
+                    if (!rest.contains("/by")) {
+                        throw new ShrekException(
+                                "OOPS!!! A deadline needs a '/by' followed by the due date/time.");
+                    }
+                    String[] parts = rest.split("/by", 2);
+                    String description = parts[0].trim();
+                    String by = parts[1].trim();
+                    if (description.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
+                    }
+                    if (by.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The due date/time of a deadline cannot be empty.");
+                    }
+                    tasks[taskCount] = new Deadline(description, by);
+                    taskCount++;
+                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                } else if (input.equals("event") || input.startsWith("event ")) {
+                    String rest = input.length() > 5 ? input.substring(5).trim() : "";
+                    if (rest.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
+                    }
+                    if (!rest.contains("/from")) {
+                        throw new ShrekException(
+                                "OOPS!!! An event needs a '/from' followed by the start date/time.");
+                    }
+                    String[] fromSplit = rest.split("/from", 2);
+                    String description = fromSplit[0].trim();
+                    if (description.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
+                    }
+                    if (!fromSplit[1].contains("/to")) {
+                        throw new ShrekException(
+                                "OOPS!!! An event needs a '/to' followed by the end date/time.");
+                    }
+                    String[] toSplit = fromSplit[1].split("/to", 2);
+                    String from = toSplit[0].trim();
+                    String to = toSplit[1].trim();
+                    if (from.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The start date/time of an event cannot be empty.");
+                    }
+                    if (to.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The end date/time of an event cannot be empty.");
+                    }
+                    tasks[taskCount] = new Event(description, from, to);
+                    taskCount++;
+                    printAddedMessage(tasks[taskCount - 1], taskCount, separator);
+                } else {
+                    throw new ShrekException("OOPS!!! I'm sorry, but I don't know what that means :-(");
                 }
-                System.out.println(separator);
-            } else if (input.startsWith("mark ")) {
-                int index = Integer.parseInt(input.substring(5).trim()) - 1;
-                tasks[index].markAsDone();
-                System.out.println("     Nice! I've marked this task as done:");
-                System.out.println("       " + tasks[index]);
-                System.out.println(separator);
-            } else if (input.startsWith("unmark ")) {
-                int index = Integer.parseInt(input.substring(7).trim()) - 1;
-                tasks[index].markAsNotDone();
-                System.out.println("     OK, I've marked this task as not done yet:");
-                System.out.println("       " + tasks[index]);
-                System.out.println(separator);
-            } else if (input.startsWith("todo ")) {
-                String description = input.substring(5).trim();
-                tasks[taskCount] = new Todo(description);
-                taskCount++;
-                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
-            } else if (input.startsWith("deadline ")) {
-                String rest = input.substring(9).trim();
-                String[] parts = rest.split("/by", 2);
-                String description = parts[0].trim();
-                String by = parts[1].trim();
-                tasks[taskCount] = new Deadline(description, by);
-                taskCount++;
-                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
-            } else if (input.startsWith("event ")) {
-                String rest = input.substring(6).trim();
-                String[] fromSplit = rest.split("/from", 2);
-                String description = fromSplit[0].trim();
-                String[] toSplit = fromSplit[1].split("/to", 2);
-                String from = toSplit[0].trim();
-                String to = toSplit[1].trim();
-                tasks[taskCount] = new Event(description, from, to);
-                taskCount++;
-                printAddedMessage(tasks[taskCount - 1], taskCount, separator);
-            } else {
-                tasks[taskCount] = new Todo(input);
-                taskCount++;
-                System.out.println("     added: " + input);
+            } catch (ShrekException e) {
+                System.out.println("     " + e.getMessage());
                 System.out.println(separator);
             }
         }
         scanner.close();
+    }
+
+    private static int parseTaskIndex(String input, String command, int taskCount) throws ShrekException {
+        String numberPart = input.length() > command.length() ? input.substring(command.length()).trim() : "";
+        if (numberPart.isEmpty()) {
+            throw new ShrekException("OOPS!!! Please specify which task number to " + command + ".");
+        }
+        int index;
+        try {
+            index = Integer.parseInt(numberPart) - 1;
+        } catch (NumberFormatException e) {
+            throw new ShrekException("OOPS!!! The task number must be a valid number.");
+        }
+        if (index < 0 || index >= taskCount) {
+            throw new ShrekException("OOPS!!! That task number doesn't exist. You have "
+                    + taskCount + " task(s) in your list.");
+        }
+        return index;
     }
 
     private static void printAddedMessage(Task task, int taskCount, String separator) {
