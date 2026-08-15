@@ -25,54 +25,67 @@ public class Shrek {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String input = scanner.nextLine();
+            String commandWord = input.split(" ", 2)[0];
+            String commandArgs = input.length() > commandWord.length() ? input.substring(commandWord.length()).trim() : "";
+            CommandType command = parseCommand(commandWord);
+
             try {
-                if (input.equals("bye")) {
+                switch (command) {
+                case BYE:
                     System.out.println("     Bye. Hope to see you again soon!");
                     System.out.println(separator);
-                    break;
-                } else if (input.equals("list")) {
+                    scanner.close();
+                    return;
+                case LIST:
                     System.out.println("     Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.println("     " + (i + 1) + "." + tasks.get(i));
                     }
                     System.out.println(separator);
-                } else if (input.equals("mark") || input.startsWith("mark ")) {
-                    int index = parseTaskIndex(input, "mark", tasks.size());
+                    break;
+                case MARK: {
+                    int index = parseTaskIndex(commandArgs, "mark", tasks.size());
                     tasks.get(index).markAsDone();
                     System.out.println("     Nice! I've marked this task as done:");
                     System.out.println("       " + tasks.get(index));
                     System.out.println(separator);
-                } else if (input.equals("unmark") || input.startsWith("unmark ")) {
-                    int index = parseTaskIndex(input, "unmark", tasks.size());
+                    break;
+                }
+                case UNMARK: {
+                    int index = parseTaskIndex(commandArgs, "unmark", tasks.size());
                     tasks.get(index).markAsNotDone();
                     System.out.println("     OK, I've marked this task as not done yet:");
                     System.out.println("       " + tasks.get(index));
                     System.out.println(separator);
-                } else if (input.equals("delete") || input.startsWith("delete ")) {
-                    int index = parseTaskIndex(input, "delete", tasks.size());
+                    break;
+                }
+                case DELETE: {
+                    int index = parseTaskIndex(commandArgs, "delete", tasks.size());
                     Task removed = tasks.remove(index);
                     System.out.println("     Noted. I've removed this task:");
                     System.out.println("       " + removed);
                     System.out.println("     Now you have " + tasks.size() + " tasks in the list.");
                     System.out.println(separator);
-                } else if (input.equals("todo") || input.startsWith("todo ")) {
-                    String description = input.length() > 4 ? input.substring(4).trim() : "";
-                    if (description.isEmpty()) {
+                    break;
+                }
+                case TODO: {
+                    if (commandArgs.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of a todo cannot be empty.");
                     }
-                    Task newTask = new Todo(description);
+                    Task newTask = new Todo(commandArgs);
                     tasks.add(newTask);
                     printAddedMessage(newTask, tasks.size(), separator);
-                } else if (input.equals("deadline") || input.startsWith("deadline ")) {
-                    String rest = input.length() > 8 ? input.substring(8).trim() : "";
-                    if (rest.isEmpty()) {
+                    break;
+                }
+                case DEADLINE: {
+                    if (commandArgs.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
                     }
-                    if (!rest.contains("/by")) {
+                    if (!commandArgs.contains("/by")) {
                         throw new ShrekException(
                                 "OOPS!!! A deadline needs a '/by' followed by the due date/time.");
                     }
-                    String[] parts = rest.split("/by", 2);
+                    String[] parts = commandArgs.split("/by", 2);
                     String description = parts[0].trim();
                     String by = parts[1].trim();
                     if (description.isEmpty()) {
@@ -84,16 +97,17 @@ public class Shrek {
                     Task newTask = new Deadline(description, by);
                     tasks.add(newTask);
                     printAddedMessage(newTask, tasks.size(), separator);
-                } else if (input.equals("event") || input.startsWith("event ")) {
-                    String rest = input.length() > 5 ? input.substring(5).trim() : "";
-                    if (rest.isEmpty()) {
+                    break;
+                }
+                case EVENT: {
+                    if (commandArgs.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
                     }
-                    if (!rest.contains("/from")) {
+                    if (!commandArgs.contains("/from")) {
                         throw new ShrekException(
                                 "OOPS!!! An event needs a '/from' followed by the start date/time.");
                     }
-                    String[] fromSplit = rest.split("/from", 2);
+                    String[] fromSplit = commandArgs.split("/from", 2);
                     String description = fromSplit[0].trim();
                     if (description.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
@@ -114,7 +128,10 @@ public class Shrek {
                     Task newTask = new Event(description, from, to);
                     tasks.add(newTask);
                     printAddedMessage(newTask, tasks.size(), separator);
-                } else {
+                    break;
+                }
+                case UNKNOWN:
+                default:
                     throw new ShrekException("OOPS!!! I'm sorry, but I don't know what that means :-(");
                 }
             } catch (ShrekException e) {
@@ -122,17 +139,23 @@ public class Shrek {
                 System.out.println(separator);
             }
         }
-        scanner.close();
     }
 
-    private static int parseTaskIndex(String input, String command, int taskCount) throws ShrekException {
-        String numberPart = input.length() > command.length() ? input.substring(command.length()).trim() : "";
-        if (numberPart.isEmpty()) {
+    private static CommandType parseCommand(String commandWord) {
+        try {
+            return CommandType.valueOf(commandWord.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return CommandType.UNKNOWN;
+        }
+    }
+
+    private static int parseTaskIndex(String args, String command, int taskCount) throws ShrekException {
+        if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! Please specify which task number to " + command + ".");
         }
         int index;
         try {
-            index = Integer.parseInt(numberPart) - 1;
+            index = Integer.parseInt(args) - 1;
         } catch (NumberFormatException e) {
             throw new ShrekException("OOPS!!! The task number must be a valid number.");
         }
