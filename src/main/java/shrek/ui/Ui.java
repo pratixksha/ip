@@ -1,4 +1,9 @@
+package shrek.ui;
+
 import java.util.Scanner;
+
+import shrek.task.Task;
+import shrek.task.TaskList;
 
 /**
  * Deals with interactions with the user: reading input and printing output.

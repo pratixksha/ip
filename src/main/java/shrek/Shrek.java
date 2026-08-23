@@ -1,3 +1,11 @@
+package shrek;
+
+import shrek.parser.Parser;
+import shrek.storage.Storage;
+import shrek.task.Task;
+import shrek.task.TaskList;
+import shrek.ui.Ui;
+
 /**
  * The entry point for the Shrek chatbot.
  */

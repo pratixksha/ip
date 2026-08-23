@@ -1,13 +1,20 @@
+package shrek.storage;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import shrek.task.Deadline;
+import shrek.task.Event;
+import shrek.task.Task;
+import shrek.task.Todo;
 
 /**
  * Handles loading tasks from and saving tasks to the hard disk.
