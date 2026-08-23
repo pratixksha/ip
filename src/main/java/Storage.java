@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /**
  * Handles loading tasks from and saving tasks to the hard disk.
@@ -57,7 +59,7 @@ public class Storage {
                     task = new Todo(description);
                     break;
                 case "D":
-                    String by = parts[3].trim();
+                    LocalDate by = LocalDate.parse(parts[3].trim());
                     task = new Deadline(description, by);
                     break;
                 case "E":
@@ -73,8 +75,8 @@ public class Storage {
                 task.markAsDone();
             }
             return task;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // Corrupted line (missing fields) — skip it rather than crash.
+        } catch (ArrayIndexOutOfBoundsException | DateTimeParseException e) {
+            // Corrupted or malformed line — skip it rather than crash.
             return null;
         }
     }
