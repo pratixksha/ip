@@ -25,6 +25,10 @@ public class Task {
         return description;
     }
 
+    public boolean isDone() {
+        return isDone;
+    }
+
     // converts this task into a single line for saving to disk
     public String toSaveFormat() {
         return "T | " + (isDone ? "1" : "0") + " | " + description;
