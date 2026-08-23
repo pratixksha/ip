@@ -1,5 +1,6 @@
 package shrek.ui;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import shrek.task.Task;
@@ -85,7 +86,7 @@ public class Ui {
     /**
      * Prints a confirmation that a task was added.
      *
-     * @param task the task that was added.
+     * @param task      the task that was added.
      * @param taskCount the new total number of tasks.
      */
     public void showTaskAdded(Task task, int taskCount) {
@@ -120,7 +121,7 @@ public class Ui {
     /**
      * Prints a confirmation that a task was deleted.
      *
-     * @param task the task that was removed.
+     * @param task      the task that was removed.
      * @param taskCount the new total number of tasks.
      */
     public void showTaskDeleted(Task task, int taskCount) {
@@ -144,5 +145,13 @@ public class Ui {
      */
     public void close() {
         scanner.close();
+    }
+
+    public void showMatchingTasks(ArrayList<Task> matches) {
+        System.out.println("     Here are the matching tasks in your list:");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println("     " + (i + 1) + "." + matches.get(i));
+        }
+        System.out.println(SEPARATOR);
     }
 }

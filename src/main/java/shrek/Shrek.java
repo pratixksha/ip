@@ -1,5 +1,7 @@
 package shrek;
 
+import java.util.ArrayList;
+
 import shrek.parser.Parser;
 import shrek.storage.Storage;
 import shrek.task.Task;
@@ -89,6 +91,14 @@ public class Shrek {
                         tasks.add(newTask);
                         storage.save(tasks.getAll());
                         ui.showTaskAdded(newTask, tasks.size());
+                        break;
+                    }
+                    case FIND: {
+                        if (commandArgs.isEmpty()) {
+                            throw new ShrekException("OOPS!!! Please specify a keyword to search for.");
+                        }
+                        ArrayList<Task> matches = tasks.find(commandArgs);
+                        ui.showMatchingTasks(matches);
                         break;
                     }
                     case UNKNOWN:
