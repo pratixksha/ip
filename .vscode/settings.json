@@ -1,0 +1,10 @@
+{
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-25",
+      "path": "/Users/pratiksha/.sdkman/candidates/java/25.0.3.fx-zulu"
+    }
+  ],
+  "java.import.gradle.java.home": "/Users/pratiksha/.sdkman/candidates/java/25.0.3.fx-zulu",
+  "java.configuration.updateBuildConfiguration": "interactive"
+}
