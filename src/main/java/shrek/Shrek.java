@@ -14,6 +14,11 @@ public class Shrek {
     private TaskList tasks;
     private final Ui ui;
 
+    /**
+     * Creates a new Shrek chatbot, loading saved tasks from the given file path.
+     *
+     * @param filePath the relative path to the data file.
+     */
     public Shrek(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
@@ -25,6 +30,9 @@ public class Shrek {
         }
     }
 
+    /**
+     * Runs the main command loop until the user types "bye".
+     */
     public void run() {
         ui.showWelcome();
         while (true) {
@@ -93,6 +101,11 @@ public class Shrek {
         }
     }
 
+    /**
+     * Starts the Shrek chatbot.
+     *
+     * @param args command line arguments (unused).
+     */
     public static void main(String[] args) {
         new Shrek("./data/shrek.txt").run();
     }

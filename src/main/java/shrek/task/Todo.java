@@ -1,7 +1,15 @@
 package shrek.task;
 
+/**
+ * Represents a task with no date or time attached to it.
+ */
 public class Todo extends Task {
 
+    /**
+     * Creates a new todo task.
+     *
+     * @param description the text describing the task.
+     */
     public Todo(String description) {
         super(description);
     }
@@ -15,5 +23,4 @@ public class Todo extends Task {
     public String toString() {
         return "[T]" + super.toString();
     }
-    
 }

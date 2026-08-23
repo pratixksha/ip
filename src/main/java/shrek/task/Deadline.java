@@ -3,10 +3,18 @@ package shrek.task;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Represents a task that needs to be done before a specific date.
+ */
 public class Deadline extends Task {
-
     protected LocalDate by;
 
+    /**
+     * Creates a new deadline task.
+     *
+     * @param description the text describing the task.
+     * @param by the date by which the task should be done.
+     */
     public Deadline(String description, LocalDate by) {
         super(description);
         this.by = by;
@@ -19,7 +27,7 @@ public class Deadline extends Task {
 
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " 
-        + by.format(DateTimeFormatter.ofPattern("MMM dd yyyy")) + ")";
+        return "[D]" + super.toString() + " (by: "
+                + by.format(DateTimeFormatter.ofPattern("MMM dd yyyy")) + ")";
     }
 }

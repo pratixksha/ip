@@ -13,6 +13,12 @@ import shrek.task.Todo;
  */
 public class Parser {
 
+    /**
+     * Determines the command type from the first word of the input.
+     *
+     * @param input the raw user input line.
+     * @return the matching command type, or UNKNOWN if unrecognized.
+     */
     public static CommandType parseCommandType(String input) {
         String commandWord = input.split(" ", 2)[0];
         try {
@@ -22,12 +28,27 @@ public class Parser {
         }
     }
 
+    /**
+     * Extracts everything after the first word of the input.
+     *
+     * @param input the raw user input line.
+     * @return the text following the command word, trimmed.
+     */
     public static String parseArgs(String input) {
         String commandWord = input.split(" ", 2)[0];
         return input.length() > commandWord.length()
                 ? input.substring(commandWord.length()).trim() : "";
     }
 
+    /**
+     * Parses a task number argument into a validated zero-based index.
+     *
+     * @param args the argument text following the command word.
+     * @param command the command name, used in error messages.
+     * @param taskCount the current number of tasks, for bounds checking.
+     * @return the zero-based task index.
+     * @throws ShrekException if the argument is missing, non-numeric, or out of range.
+     */
     public static int parseTaskIndex(String args, String command, int taskCount) throws ShrekException {
         if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! Please specify which task number to " + command + ".");
@@ -45,6 +66,13 @@ public class Parser {
         return index;
     }
 
+    /**
+     * Parses a todo command's arguments into a Todo task.
+     *
+     * @param args the argument text following "todo".
+     * @return the constructed Todo task.
+     * @throws ShrekException if the description is empty.
+     */
     public static Todo parseTodo(String args) throws ShrekException {
         if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! The description of a todo cannot be empty.");
@@ -52,6 +80,13 @@ public class Parser {
         return new Todo(args);
     }
 
+    /**
+     * Parses a deadline command's arguments into a Deadline task.
+     *
+     * @param args the argument text following "deadline".
+     * @return the constructed Deadline task.
+     * @throws ShrekException if the description, date is missing, or the date is malformed.
+     */
     public static Deadline parseDeadline(String args) throws ShrekException {
         if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
@@ -78,6 +113,13 @@ public class Parser {
         return new Deadline(description, by);
     }
 
+    /**
+     * Parses an event command's arguments into an Event task.
+     *
+     * @param args the argument text following "event".
+     * @return the constructed Event task.
+     * @throws ShrekException if the description or either date/time is missing.
+     */
     public static Event parseEvent(String args) throws ShrekException {
         if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
