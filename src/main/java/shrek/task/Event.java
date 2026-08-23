@@ -4,6 +4,7 @@ package shrek.task;
  * Represents a task that starts and ends at specific date/times.
  */
 public class Event extends Task {
+
     protected String from;
     protected String to;
 
@@ -11,8 +12,8 @@ public class Event extends Task {
      * Creates a new event task.
      *
      * @param description the text describing the task.
-     * @param from the start date/time of the event.
-     * @param to the end date/time of the event.
+     * @param from        the start date/time of the event.
+     * @param to          the end date/time of the event.
      */
     public Event(String description, String from, String to) {
         super(description);

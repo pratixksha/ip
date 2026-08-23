@@ -9,8 +9,7 @@ import shrek.task.TaskList;
  * Deals with interactions with the user: reading input and printing output.
  */
 public class Ui {
-    private static final String SEPARATOR =
-            "    ____________________________________________________________";
+    private static final String SEPARATOR = "    ____________________________________________________________";
     private static final String BANNER = "     ____  _              _    \n"
             + "    / ___|| |__  _ __ ___| | __\n"
             + "    \\___ \\| '_ \\| '__/ _ \\ |/ /\n"
