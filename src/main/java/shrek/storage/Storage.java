@@ -22,6 +22,11 @@ import shrek.task.Todo;
 public class Storage {
     private final Path filePath;
 
+    /**
+     * Creates a new Storage pointing at the given relative file path.
+     *
+     * @param relativePath the relative path to the data file.
+     */
     public Storage(String relativePath) {
         this.filePath = Paths.get(relativePath);
     }
@@ -29,6 +34,8 @@ public class Storage {
     /**
      * Loads tasks from the data file. If the file or its parent folder
      * doesn't exist, returns an empty list instead of failing.
+     *
+     * @return the list of tasks loaded from disk.
      */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -53,6 +60,13 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Parses a single saved line into a Task. Returns null if the line
+     * is corrupted or malformed, so it can be skipped rather than crash.
+     *
+     * @param line the raw line read from the data file.
+     * @return the parsed task, or null if the line couldn't be parsed.
+     */
     private Task parseLine(String line) {
         try {
             String[] parts = line.split(" \\| ");
@@ -91,6 +105,8 @@ public class Storage {
     /**
      * Saves the given list of tasks to the data file, creating the
      * parent folder first if it doesn't exist.
+     *
+     * @param tasks the tasks to save.
      */
     public void save(ArrayList<Task> tasks) {
         try {
