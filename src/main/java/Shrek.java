@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /**
  * The entry point for the Shrek chatbot.
@@ -90,16 +92,23 @@ public class Shrek {
                     }
                     if (!commandArgs.contains("/by")) {
                         throw new ShrekException(
-                                "OOPS!!! A deadline needs a '/by' followed by the due date/time.");
+                                "OOPS!!! A deadline needs a '/by' followed by the due date.");
                     }
                     String[] parts = commandArgs.split("/by", 2);
                     String description = parts[0].trim();
-                    String by = parts[1].trim();
+                    String byText = parts[1].trim();
                     if (description.isEmpty()) {
                         throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
                     }
-                    if (by.isEmpty()) {
-                        throw new ShrekException("OOPS!!! The due date/time of a deadline cannot be empty.");
+                    if (byText.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The due date of a deadline cannot be empty.");
+                    }
+                    LocalDate by;
+                    try {
+                        by = LocalDate.parse(byText);
+                    } catch (DateTimeParseException e) {
+                        throw new ShrekException(
+                                "OOPS!!! Please enter the deadline date in yyyy-mm-dd format, e.g. 2019-10-15.");
                     }
                     Task newTask = new Deadline(description, by);
                     tasks.add(newTask);
