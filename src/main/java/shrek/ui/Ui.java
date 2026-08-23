@@ -1,5 +1,6 @@
 package shrek.ui;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import shrek.task.Task;
@@ -9,8 +10,7 @@ import shrek.task.TaskList;
  * Deals with interactions with the user: reading input and printing output.
  */
 public class Ui {
-    private static final String SEPARATOR =
-            "    ____________________________________________________________";
+    private static final String SEPARATOR = "    ____________________________________________________________";
     private static final String BANNER = "     ____  _              _    \n"
             + "    / ___|| |__  _ __ ___| | __\n"
             + "    \\___ \\| '_ \\| '__/ _ \\ |/ /\n"
@@ -90,5 +90,13 @@ public class Ui {
 
     public void close() {
         scanner.close();
+    }
+
+    public void showMatchingTasks(ArrayList<Task> matches) {
+        System.out.println("     Here are the matching tasks in your list:");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println("     " + (i + 1) + "." + matches.get(i));
+        }
+        System.out.println(SEPARATOR);
     }
 }

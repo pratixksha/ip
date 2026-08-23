@@ -1,4 +1,5 @@
 package shrek;
+
 /**
  * Represents the different types of commands the chatbot can understand.
  */
@@ -11,5 +12,6 @@ public enum CommandType {
     TODO,
     DEADLINE,
     EVENT,
+    FIND,
     UNKNOWN
 }
