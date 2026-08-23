@@ -8,6 +8,7 @@ import shrek.ShrekException;
 import shrek.task.Deadline;
 import shrek.task.Event;
 import shrek.task.Todo;
+
 /**
  * Deals with making sense of the user command.
  */
@@ -25,7 +26,8 @@ public class Parser {
     public static String parseArgs(String input) {
         String commandWord = input.split(" ", 2)[0];
         return input.length() > commandWord.length()
-                ? input.substring(commandWord.length()).trim() : "";
+                ? input.substring(commandWord.length()).trim()
+                : "";
     }
 
     public static int parseTaskIndex(String args, String command, int taskCount) throws ShrekException {

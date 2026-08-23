@@ -1,4 +1,5 @@
 package shrek;
+
 /**
  * Represents an exception specific to the Shrek chatbot.
  */

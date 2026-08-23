@@ -1,4 +1,5 @@
 package shrek;
+
 /**
  * Represents the different types of commands the chatbot can understand.
  */
