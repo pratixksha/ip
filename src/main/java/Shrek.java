@@ -6,6 +6,8 @@ import java.util.Scanner;
  */
 
 public class Shrek {
+    private static final String DATA_FILE_PATH = "./data/shrek.txt";
+
     public static void main(String[] args) {
         String separator = "    ____________________________________________________________";
         String banner = "     ____  _              _    \n"
@@ -20,7 +22,8 @@ public class Shrek {
         System.out.println("     What can I do for you?");
         System.out.println(separator);
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        Storage storage = new Storage(DATA_FILE_PATH);
+        ArrayList<Task> tasks = storage.load();
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -46,6 +49,7 @@ public class Shrek {
                 case MARK: {
                     int index = parseTaskIndex(commandArgs, "mark", tasks.size());
                     tasks.get(index).markAsDone();
+                    storage.save(tasks);
                     System.out.println("     Nice! I've marked this task as done:");
                     System.out.println("       " + tasks.get(index));
                     System.out.println(separator);
@@ -54,6 +58,7 @@ public class Shrek {
                 case UNMARK: {
                     int index = parseTaskIndex(commandArgs, "unmark", tasks.size());
                     tasks.get(index).markAsNotDone();
+                    storage.save(tasks);
                     System.out.println("     OK, I've marked this task as not done yet:");
                     System.out.println("       " + tasks.get(index));
                     System.out.println(separator);
@@ -62,6 +67,7 @@ public class Shrek {
                 case DELETE: {
                     int index = parseTaskIndex(commandArgs, "delete", tasks.size());
                     Task removed = tasks.remove(index);
+                    storage.save(tasks);
                     System.out.println("     Noted. I've removed this task:");
                     System.out.println("       " + removed);
                     System.out.println("     Now you have " + tasks.size() + " tasks in the list.");
@@ -74,6 +80,7 @@ public class Shrek {
                     }
                     Task newTask = new Todo(commandArgs);
                     tasks.add(newTask);
+                    storage.save(tasks);
                     printAddedMessage(newTask, tasks.size(), separator);
                     break;
                 }
@@ -96,6 +103,7 @@ public class Shrek {
                     }
                     Task newTask = new Deadline(description, by);
                     tasks.add(newTask);
+                    storage.save(tasks);
                     printAddedMessage(newTask, tasks.size(), separator);
                     break;
                 }
@@ -127,6 +135,7 @@ public class Shrek {
                     }
                     Task newTask = new Event(description, from, to);
                     tasks.add(newTask);
+                    storage.save(tasks);
                     printAddedMessage(newTask, tasks.size(), separator);
                     break;
                 }
