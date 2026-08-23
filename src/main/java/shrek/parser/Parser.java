@@ -1,6 +1,13 @@
+package shrek.parser;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
+import shrek.CommandType;
+import shrek.ShrekException;
+import shrek.task.Deadline;
+import shrek.task.Event;
+import shrek.task.Todo;
 /**
  * Deals with making sense of the user command.
  */

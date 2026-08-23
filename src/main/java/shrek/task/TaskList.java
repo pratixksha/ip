@@ -1,3 +1,5 @@
+package shrek.task;
+
 import java.util.ArrayList;
 
 /**
