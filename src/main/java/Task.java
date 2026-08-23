@@ -1,6 +1,6 @@
 public class Task {
-    private String description;
-    private boolean isDone;
+    protected String description;
+    protected boolean isDone;
 
     public Task(String description) {
         this.description = description;
@@ -21,6 +21,11 @@ public class Task {
 
     public String getDescription() {
         return description;
+    }
+
+    // converts this task into a single line for saving to disk
+    public String toSaveFormat() {
+        return "T | " + (isDone ? "1" : "0") + " | " + description;
     }
 
     @Override
