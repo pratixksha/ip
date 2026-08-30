@@ -1,0 +1,106 @@
+package shrek;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+
+/**
+ * A reusable chat message control backed by {@code DialogBox.fxml}.
+ */
+public class DialogBox extends HBox {
+
+    @FXML
+    private Label dialog;
+
+    @FXML
+    private ImageView displayPicture;
+
+    /**
+     * Loads a dialog box from FXML and fills it with the supplied content.
+     *
+     * @param text  the message to display.
+     * @param image the avatar of the message sender.
+     */
+    private DialogBox(String text, Image image) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("/view/DialogBox.fxml"));
+            fxmlLoader.setController(this);
+            fxmlLoader.setRoot(this);
+            fxmlLoader.load();
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalStateException("Unable to load the dialog box layout.", e);
+        }
+
+        dialog.setText(text);
+        displayPicture.setImage(image);
+    }
+
+    /** Moves the avatar to the left and gives the reply bubble its own style. */
+    private void flip() {
+        ObservableList<Node> reversedChildren = FXCollections.observableArrayList(getChildren());
+        Collections.reverse(reversedChildren);
+        getChildren().setAll(reversedChildren);
+        setAlignment(Pos.TOP_LEFT);
+        dialog.getStyleClass().add("reply-label");
+    }
+
+    /**
+     * Creates a user-side dialog box.
+     *
+     * @param text  the user's message.
+     * @param image the user's avatar.
+     * @return a dialog box aligned to the right.
+     */
+    public static DialogBox getUserDialog(String text, Image image) {
+        return new DialogBox(text, image);
+    }
+
+    /**
+     * Creates a Shrek-side dialog box and applies a command-specific style.
+     *
+     * @param text        the response from Shrek.
+     * @param image       Shrek's avatar.
+     * @param commandType the command that produced the response.
+     * @return a dialog box aligned to the left.
+     */
+    public static DialogBox getShrekDialog(String text, Image image, CommandType commandType) {
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.flip();
+        dialogBox.changeDialogStyle(text, commandType);
+        return dialogBox;
+    }
+
+    /** Applies the Part 5 response colors to relevant command results. */
+    private void changeDialogStyle(String response, CommandType commandType) {
+        if (response.startsWith("OOPS")) {
+            dialog.getStyleClass().add("error-label");
+            return;
+        }
+        switch (commandType) {
+            case TODO:
+            case DEADLINE:
+            case EVENT:
+                dialog.getStyleClass().add("add-label");
+                break;
+            case MARK:
+            case UNMARK:
+                dialog.getStyleClass().add("marked-label");
+                break;
+            case DELETE:
+                dialog.getStyleClass().add("delete-label");
+                break;
+            default:
+                // Keep the standard reply style for other commands.
+        }
+    }
+}
