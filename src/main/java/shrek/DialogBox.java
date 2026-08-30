@@ -86,21 +86,29 @@ public class DialogBox extends HBox {
             dialog.getStyleClass().add("error-label");
             return;
         }
-        switch (commandType) {
-            case TODO:
-            case DEADLINE:
-            case EVENT:
-                dialog.getStyleClass().add("add-label");
-                break;
-            case MARK:
-            case UNMARK:
-                dialog.getStyleClass().add("marked-label");
-                break;
-            case DELETE:
-                dialog.getStyleClass().add("delete-label");
-                break;
-            default:
-                // Keep the standard reply style for other commands.
+
+        if (matchesAnyCommand(commandType, CommandType.TODO, CommandType.DEADLINE, CommandType.EVENT)) {
+            dialog.getStyleClass().add("add-label");
+        } else if (matchesAnyCommand(commandType, CommandType.MARK, CommandType.UNMARK)) {
+            dialog.getStyleClass().add("marked-label");
+        } else if (matchesAnyCommand(commandType, CommandType.DELETE)) {
+            dialog.getStyleClass().add("delete-label");
         }
+    }
+
+    /**
+     * Checks whether a command is one of the supplied commands.
+     *
+     * @param command the command to check.
+     * @param candidates the commands that should match.
+     * @return true when {@code command} appears in {@code candidates}.
+     */
+    private boolean matchesAnyCommand(CommandType command, CommandType... candidates) {
+        for (CommandType candidate : candidates) {
+            if (command == candidate) {
+                return true;
+            }
+        }
+        return false;
     }
 }
