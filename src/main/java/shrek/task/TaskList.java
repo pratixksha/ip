@@ -71,6 +71,13 @@ public class TaskList {
         return tasks;
     }
 
+    /**
+     * Returns a list of tasks whose description contains the given keyword.
+     * The match is case-insensitive.
+     *
+     * @param keyword the search term to match against task descriptions.
+     * @return a list of tasks matching the keyword.
+     */
     public ArrayList<Task> find(String keyword) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
