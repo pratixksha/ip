@@ -147,6 +147,11 @@ public class Ui {
         scanner.close();
     }
 
+    /**
+     * Prints the given list of matching tasks to the console.
+     *
+     * @param matches the list of tasks to display.
+     */
     public void showMatchingTasks(ArrayList<Task> matches) {
         System.out.println("     Here are the matching tasks in your list:");
         for (int i = 0; i < matches.size(); i++) {
