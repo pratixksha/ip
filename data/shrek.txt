@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-D | 0 | hw | 2026-12-03
-=======
-T | 0 | hw
 D | 0 | return book | 2019-10-15
 T | 0 | read book
->>>>>>> branch-Level-9
+E | 1 | party | 2pm | 4pm
+T | 0 | hw

@@ -71,6 +71,16 @@ public class Ui {
     }
 
     /**
+     * Prints a response produced by the chatbot command processor.
+     *
+     * @param response the response to print.
+     */
+    public void showResponse(String response) {
+        System.out.println("     " + response.replace("\n", "\n     "));
+        System.out.println(SEPARATOR);
+    }
+
+    /**
      * Prints all tasks in the given task list.
      *
      * @param tasks the task list to display.
