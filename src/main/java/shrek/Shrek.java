@@ -101,24 +101,15 @@ public class Shrek {
                 }
                 case TODO: {
                     Task newTask = Parser.parseTodo(commandArgs);
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case DEADLINE: {
                     Task newTask = Parser.parseDeadline(commandArgs);
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case EVENT: {
                     Task newTask = Parser.parseEvent(commandArgs);
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case FIND: {
                     if (commandArgs.isEmpty()) {
@@ -133,6 +124,19 @@ public class Shrek {
         } catch (ShrekException e) {
             return e.getMessage();
         }
+    }
+
+    /**
+     * Adds a parsed task, persists the updated list, and creates its confirmation response.
+     *
+     * @param task the task to add.
+     * @return the confirmation response for the newly added task.
+     */
+    private String addTaskAndGetResponse(Task task) {
+        tasks.add(task);
+        storage.save(tasks.getAll());
+        return "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
     }
 
     /**
