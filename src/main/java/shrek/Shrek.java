@@ -37,7 +37,7 @@ public class Shrek {
         storage = new Storage(filePath);
         try {
             tasks = new TaskList(storage.load());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             ui.showLoadingError();
             tasks = new TaskList();
         }
@@ -54,7 +54,7 @@ public class Shrek {
             String input = ui.readCommand();
             String response = getResponse(input);
             ui.showResponse(response);
-            if (Parser.parseCommandType(input) == CommandType.BYE) {
+            if (lastCommandType == CommandType.BYE) {
                 ui.close();
                 return;
             }
@@ -84,20 +84,10 @@ public class Shrek {
                     return "Bye. Hope to see you again soon!";
                 case LIST:
                     return formatTaskList(tasks.getAll());
-                case MARK: {
-                    int index = Parser.parseTaskIndex(commandArgs, "mark", tasks.size());
-                    assert index >= 0 && index < tasks.size() : "Parser returned an invalid task index.";
-                    tasks.get(index).markAsDone();
-                    storage.save(tasks.getAll());
-                    return "Nice! I've marked this task as done:\n  " + tasks.get(index);
-                }
-                case UNMARK: {
-                    int index = Parser.parseTaskIndex(commandArgs, "unmark", tasks.size());
-                    assert index >= 0 && index < tasks.size() : "Parser returned an invalid task index.";
-                    tasks.get(index).markAsNotDone();
-                    storage.save(tasks.getAll());
-                    return "OK, I've marked this task as not done yet:\n  " + tasks.get(index);
-                }
+                case MARK:
+                    return updateTaskStatus(commandArgs, true);
+                case UNMARK:
+                    return updateTaskStatus(commandArgs, false);
                 case DELETE: {
                     int index = Parser.parseTaskIndex(commandArgs, "delete", tasks.size());
                     assert index >= 0 && index < tasks.size() : "Parser returned an invalid task index.";
@@ -109,26 +99,17 @@ public class Shrek {
                 case TODO: {
                     Task newTask = Parser.parseTodo(commandArgs);
                     assert newTask != null : "A successful todo parse must return a task.";
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case DEADLINE: {
                     Task newTask = Parser.parseDeadline(commandArgs);
                     assert newTask != null : "A successful deadline parse must return a task.";
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case EVENT: {
                     Task newTask = Parser.parseEvent(commandArgs);
                     assert newTask != null : "A successful event parse must return a task.";
-                    tasks.add(newTask);
-                    storage.save(tasks.getAll());
-                    return "Got it. I've added this task:\n  " + newTask
-                            + "\nNow you have " + tasks.size() + " tasks in the list.";
+                    return addTaskAndGetResponse(newTask);
                 }
                 case FIND: {
                     if (commandArgs.isEmpty()) {
@@ -143,6 +124,45 @@ public class Shrek {
         } catch (ShrekException e) {
             return e.getMessage();
         }
+    }
+
+    /**
+     * Updates a task's completion status, persists the change, and creates a response.
+     *
+     * @param commandArgs the argument text following the command.
+     * @param shouldBeDone whether the task should be marked as done.
+     * @return the confirmation response.
+     * @throws ShrekException if the task number is invalid.
+     */
+    private String updateTaskStatus(String commandArgs, boolean shouldBeDone) throws ShrekException {
+        String command = shouldBeDone ? "mark" : "unmark";
+        int index = Parser.parseTaskIndex(commandArgs, command, tasks.size());
+        Task task = tasks.get(index);
+
+        if (shouldBeDone) {
+            task.markAsDone();
+        } else {
+            task.markAsNotDone();
+        }
+
+        storage.save(tasks.getAll());
+        String response = shouldBeDone
+                ? "Nice! I've marked this task as done:"
+                : "OK, I've marked this task as not done yet:";
+        return response + "\n  " + task;
+    }
+
+    /**
+     * Adds a parsed task, persists the updated list, and creates its confirmation response.
+     *
+     * @param task the task to add.
+     * @return the confirmation response for the newly added task.
+     */
+    private String addTaskAndGetResponse(Task task) {
+        tasks.add(task);
+        storage.save(tasks.getAll());
+        return "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
     }
 
     /**
