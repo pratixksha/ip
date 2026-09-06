@@ -115,11 +115,11 @@ public class Storage {
                 parentDir.mkdirs();
             }
 
-            FileWriter writer = new FileWriter(filePath.toFile());
-            for (Task task : tasks) {
-                writer.write(task.toSaveFormat() + System.lineSeparator());
+            try (FileWriter writer = new FileWriter(filePath.toFile())) {
+                for (Task task : tasks) {
+                    writer.write(task.toSaveFormat() + System.lineSeparator());
+                }
             }
-            writer.close();
         } catch (IOException e) {
             System.out.println("     Warning: could not save tasks to disk.");
         }
