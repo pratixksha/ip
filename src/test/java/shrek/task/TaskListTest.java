@@ -42,4 +42,14 @@ public class TaskListTest {
         tasks.add(new Todo("read book"));
         assertEquals(1, tasks.getAll().size());
     }
+
+    @Test
+    public void find_keywordMatchesCaseInsensitively() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("write notes"));
+
+        assertEquals(1, tasks.find("BOOK").size());
+        assertEquals("read book", tasks.find("BOOK").get(0).getDescription());
+    }
 }

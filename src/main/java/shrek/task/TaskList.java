@@ -1,6 +1,7 @@
 package shrek.task;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Contains the task list and operations to add, delete, and access tasks.
@@ -79,12 +80,9 @@ public class TaskList {
      * @return a list of tasks matching the keyword.
      */
     public ArrayList<Task> find(String keyword) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        String lowerKeyword = keyword.toLowerCase();
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase().contains(lowerKeyword))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
