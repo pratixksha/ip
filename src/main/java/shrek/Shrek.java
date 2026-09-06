@@ -37,7 +37,7 @@ public class Shrek {
         storage = new Storage(filePath);
         try {
             tasks = new TaskList(storage.load());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             ui.showLoadingError();
             tasks = new TaskList();
         }
