@@ -28,6 +28,8 @@ public class Storage {
      * @param relativePath the relative path to the data file.
      */
     public Storage(String relativePath) {
+        assert relativePath != null && !relativePath.isBlank()
+                : "Storage requires a non-blank file path.";
         this.filePath = Paths.get(relativePath);
     }
 
@@ -69,10 +71,25 @@ public class Storage {
      */
     private Task parseLine(String line) {
         try {
-            String[] parts = line.split(" \\| ");
+            assert line != null : "A saved task line must not be null.";
+            String[] parts = line.split(" \\| ", -1);
+            // Save files are external input, so malformed records are rejected normally.
+            if (parts.length < 3) {
+                return null;
+            }
             String type = parts[0].trim();
-            boolean isDone = parts[1].trim().equals("1");
+            String doneFlag = parts[1].trim();
+            if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
+                return null;
+            }
+            // The guard above establishes the only status values understood by the format.
+            assert doneFlag.equals("0") || doneFlag.equals("1")
+                    : "A saved task must use 0 or 1 for its status.";
+            boolean isDone = doneFlag.equals("1");
             String description = parts[2].trim();
+            if (description.isEmpty()) {
+                return null;
+            }
 
             Task task;
             switch (type) {
@@ -80,12 +97,23 @@ public class Storage {
                     task = new Todo(description);
                     break;
                 case "D":
+                    if (parts.length < 4) {
+                        return null;
+                    }
+                    assert parts.length >= 4 : "A deadline record must contain a due date.";
                     LocalDate by = LocalDate.parse(parts[3].trim());
                     task = new Deadline(description, by);
                     break;
                 case "E":
+                    if (parts.length < 5) {
+                        return null;
+                    }
+                    assert parts.length >= 5 : "An event record must contain two times.";
                     String from = parts[3].trim();
                     String to = parts[4].trim();
+                    if (from.isEmpty() || to.isEmpty()) {
+                        return null;
+                    }
                     task = new Event(description, from, to);
                     break;
                 default:
@@ -109,6 +137,7 @@ public class Storage {
      * @param tasks the tasks to save.
      */
     public void save(ArrayList<Task> tasks) {
+        assert tasks != null : "Storage cannot save a null task list.";
         try {
             File parentDir = filePath.toFile().getParentFile();
             if (parentDir != null && !parentDir.exists()) {
@@ -117,6 +146,7 @@ public class Storage {
 
             try (FileWriter writer = new FileWriter(filePath.toFile())) {
                 for (Task task : tasks) {
+                    assert task != null : "Storage cannot save a null task.";
                     writer.write(task.toSaveFormat() + System.lineSeparator());
                 }
             }

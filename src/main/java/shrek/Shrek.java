@@ -41,6 +41,8 @@ public class Shrek {
             ui.showLoadingError();
             tasks = new TaskList();
         }
+        // All constructor paths create a usable task list before commands arrive.
+        assert tasks != null : "Shrek must always have a task list.";
     }
 
     /**
@@ -70,6 +72,8 @@ public class Shrek {
      * @return the response to display to the user.
      */
     public String getResponse(String input) {
+        assert input != null : "Shrek requires a command string.";
+        assert tasks != null : "Shrek must have a task list before processing commands.";
         String commandArgs = Parser.parseArgs(input);
         CommandType command = Parser.parseCommandType(input);
         lastCommandType = command;
@@ -86,6 +90,7 @@ public class Shrek {
                     return updateTaskStatus(commandArgs, false);
                 case DELETE: {
                     int index = Parser.parseTaskIndex(commandArgs, "delete", tasks.size());
+                    assert index >= 0 && index < tasks.size() : "Parser returned an invalid task index.";
                     Task removed = tasks.remove(index);
                     storage.save(tasks.getAll());
                     return "Noted. I've removed this task:\n  " + removed
@@ -93,14 +98,17 @@ public class Shrek {
                 }
                 case TODO: {
                     Task newTask = Parser.parseTodo(commandArgs);
+                    assert newTask != null : "A successful todo parse must return a task.";
                     return addTaskAndGetResponse(newTask);
                 }
                 case DEADLINE: {
                     Task newTask = Parser.parseDeadline(commandArgs);
+                    assert newTask != null : "A successful deadline parse must return a task.";
                     return addTaskAndGetResponse(newTask);
                 }
                 case EVENT: {
                     Task newTask = Parser.parseEvent(commandArgs);
+                    assert newTask != null : "A successful event parse must return a task.";
                     return addTaskAndGetResponse(newTask);
                 }
                 case FIND: {
@@ -187,11 +195,14 @@ public class Shrek {
      * @return a readable task-list response.
      */
     private String formatTaskList(ArrayList<Task> taskList, String heading) {
+        assert taskList != null : "A task list response requires a task list.";
+        assert heading != null : "A task list response requires a heading.";
         if (taskList.isEmpty()) {
             return heading + "\n  (There are no matching tasks.)";
         }
         StringBuilder response = new StringBuilder(heading);
         for (int i = 0; i < taskList.size(); i++) {
+            assert taskList.get(i) != null : "A task list response cannot contain a null task.";
             response.append("\n  ").append(i + 1).append(". ").append(taskList.get(i));
         }
         return response.toString();
