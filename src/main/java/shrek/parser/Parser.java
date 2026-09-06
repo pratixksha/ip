@@ -2,17 +2,33 @@ package shrek.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import shrek.CommandType;
 import shrek.ShrekException;
 import shrek.task.Deadline;
 import shrek.task.Event;
+import shrek.task.Task;
 import shrek.task.Todo;
 
 /**
  * Deals with making sense of the user command.
  */
 public class Parser {
+    private static final String INVALID_TAG_MESSAGE =
+            "OOPS!!! Tags must start with '#' and contain 1-10 letters, digits, hyphens, or underscores.";
+    private static final String DUPLICATE_TAG_MESSAGE = "OOPS!!! Duplicate tags are not allowed.";
+    private static final String TAG_LIMIT_MESSAGE = "OOPS!!! A task can have at most 3 tags.";
+
+    /**
+     * Represents a task description after extracting its trailing tags.
+     *
+     * @param description the description without tags.
+     * @param tags        the normalized tags.
+     */
+    public record ParsedTaskArgs(String description, List<String> tags) {
+    }
 
     /**
      * Determines the command type from the first word of the input.
@@ -76,6 +92,90 @@ public class Parser {
     }
 
     /**
+     * Extracts a contiguous suffix of tags from task-creation arguments.
+     *
+     * @param args the full task-creation arguments.
+     * @return the description and normalized trailing tags.
+     * @throws ShrekException if a tag is invalid, misplaced, duplicated, or excessive.
+     */
+    public static ParsedTaskArgs parseTaskArgs(String args) throws ShrekException {
+        assert args != null : "Task arguments must not be null.";
+        String trimmedArgs = args.trim();
+        if (trimmedArgs.isEmpty()) {
+            return new ParsedTaskArgs("", List.of());
+        }
+
+        String[] tokens = trimmedArgs.split("\\s+");
+        int firstTagIndex = -1;
+        for (int i = 0; i < tokens.length; i++) {
+            if (tokens[i].startsWith("#")) {
+                firstTagIndex = i;
+                break;
+            }
+        }
+        if (firstTagIndex == -1) {
+            return new ParsedTaskArgs(trimmedArgs, List.of());
+        }
+
+        int firstTagPosition = findTokenStart(trimmedArgs, tokens, firstTagIndex);
+        ArrayList<String> tags = parseTagTokens(tokens, firstTagIndex, true);
+        String description = trimmedArgs.substring(0, firstTagPosition).trim();
+        return new ParsedTaskArgs(description, tags);
+    }
+
+    /**
+     * Parses a space-separated list of standalone command tags.
+     *
+     * @param args the tag arguments.
+     * @return the normalized tags.
+     * @throws ShrekException if a tag is invalid, duplicated, or excessive.
+     */
+    public static ArrayList<String> parseTags(String args) throws ShrekException {
+        assert args != null : "Tag arguments must not be null.";
+        String trimmedArgs = args.trim();
+        if (trimmedArgs.isEmpty()) {
+            throw new ShrekException("OOPS!!! Please specify at least one tag.");
+        }
+        String[] tokens = trimmedArgs.split("\\s+");
+        return parseTagTokens(tokens, 0, false);
+    }
+
+    private static ArrayList<String> parseTagTokens(String[] tokens, int startIndex,
+            boolean tagsMustBeAtEnd) throws ShrekException {
+        ArrayList<String> tags = new ArrayList<>();
+        for (int i = startIndex; i < tokens.length; i++) {
+            String token = tokens[i];
+            if (!Task.isValidTag(token)) {
+                if (tagsMustBeAtEnd && !token.startsWith("#")) {
+                    throw new ShrekException("OOPS!!! Tags must appear at the end of the task description.");
+                }
+                throw new ShrekException(INVALID_TAG_MESSAGE);
+            }
+            String normalizedTag = Task.normalizeTag(token);
+            if (tags.contains(normalizedTag)) {
+                throw new ShrekException(DUPLICATE_TAG_MESSAGE);
+            }
+            tags.add(normalizedTag);
+        }
+        if (tags.size() > Task.MAX_TAG_COUNT) {
+            throw new ShrekException(TAG_LIMIT_MESSAGE);
+        }
+        return tags;
+    }
+
+    private static int findTokenStart(String input, String[] tokens, int tokenIndex) {
+        int searchFrom = 0;
+        for (int i = 0; i <= tokenIndex; i++) {
+            int tokenStart = input.indexOf(tokens[i], searchFrom);
+            if (i == tokenIndex) {
+                return tokenStart;
+            }
+            searchFrom = tokenStart + tokens[i].length();
+        }
+        return -1;
+    }
+
+    /**
      * Parses a todo command's arguments into a Todo task.
      *
      * @param args the argument text following "todo".
@@ -83,10 +183,11 @@ public class Parser {
      * @throws ShrekException if the description is empty.
      */
     public static Todo parseTodo(String args) throws ShrekException {
-        if (args.isEmpty()) {
+        ParsedTaskArgs parsedArgs = parseTaskArgs(args);
+        if (parsedArgs.description().isEmpty()) {
             throw new ShrekException("OOPS!!! The description of a todo cannot be empty.");
         }
-        return new Todo(args);
+        return new Todo(parsedArgs.description(), parsedArgs.tags());
     }
 
     /**
@@ -97,13 +198,14 @@ public class Parser {
      * @throws ShrekException if the description, date is missing, or the date is malformed.
      */
     public static Deadline parseDeadline(String args) throws ShrekException {
-        if (args.isEmpty()) {
+        ParsedTaskArgs parsedArgs = parseTaskArgs(args);
+        if (parsedArgs.description().isEmpty()) {
             throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
         }
-        if (!args.contains("/by")) {
+        if (!parsedArgs.description().contains("/by")) {
             throw new ShrekException("OOPS!!! A deadline needs a '/by' followed by the due date.");
         }
-        String[] parts = args.split("/by", 2);
+        String[] parts = parsedArgs.description().split("/by", 2);
         // The delimiter check guarantees two sections for the positive-limit split.
         assert parts.length == 2 : "A deadline must split into description and due date.";
         String description = parts[0].trim();
@@ -121,7 +223,7 @@ public class Parser {
             throw new ShrekException(
                     "OOPS!!! Please enter the deadline date in yyyy-mm-dd format, e.g. 2019-10-15.");
         }
-        return new Deadline(description, by);
+        return new Deadline(description, by, parsedArgs.tags());
     }
 
     /**
@@ -132,13 +234,14 @@ public class Parser {
      * @throws ShrekException if the description or either date/time is missing.
      */
     public static Event parseEvent(String args) throws ShrekException {
-        if (args.isEmpty()) {
+        ParsedTaskArgs parsedArgs = parseTaskArgs(args);
+        if (parsedArgs.description().isEmpty()) {
             throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
         }
-        if (!args.contains("/from")) {
+        if (!parsedArgs.description().contains("/from")) {
             throw new ShrekException("OOPS!!! An event needs a '/from' followed by the start date/time.");
         }
-        String[] fromSplit = args.split("/from", 2);
+        String[] fromSplit = parsedArgs.description().split("/from", 2);
         // The delimiter check guarantees two sections for the positive-limit split.
         assert fromSplit.length == 2 : "An event must split at its start time.";
         String description = fromSplit[0].trim();
@@ -159,6 +262,6 @@ public class Parser {
         if (to.isEmpty()) {
             throw new ShrekException("OOPS!!! The end date/time of an event cannot be empty.");
         }
-        return new Event(description, from, to);
+        return new Event(description, from, to, parsedArgs.tags());
     }
 }

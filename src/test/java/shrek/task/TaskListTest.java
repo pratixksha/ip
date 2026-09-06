@@ -52,4 +52,14 @@ public class TaskListTest {
         assertEquals(1, tasks.find("BOOK").size());
         assertEquals("read book", tasks.find("BOOK").get(0).getDescription());
     }
+
+    @Test
+    public void find_keywordMatchesTagSubstring() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("play game", java.util.List.of("#weekend")));
+        tasks.add(new Todo("read book"));
+
+        assertEquals(1, tasks.find("WEEK").size());
+        assertEquals("play game", tasks.find("WEEK").get(0).getDescription());
+    }
 }

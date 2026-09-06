@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import shrek.ShrekException;
 import shrek.task.Deadline;
+import shrek.task.Event;
 import shrek.task.Todo;
 
 public class ParserTest {
@@ -18,6 +19,33 @@ public class ParserTest {
     }
 
     @Test
+    public void parseTodo_trailingTags_extractsAndNormalizesTags() throws ShrekException {
+        Todo todo = Parser.parseTodo("play game #Weekend #fun");
+        assertEquals("play game", todo.getDescription());
+        assertEquals(java.util.List.of("#fun", "#weekend"), todo.getTags());
+    }
+
+    @Test
+    public void parseTodo_invalidTag_rejectsWholeCommand() {
+        assertThrows(ShrekException.class, () -> Parser.parseTodo("play game #invalid!"));
+    }
+
+    @Test
+    public void parseTodo_duplicateTags_rejectsWholeCommand() {
+        assertThrows(ShrekException.class, () -> Parser.parseTodo("play game #fun #FUN"));
+    }
+
+    @Test
+    public void parseTodo_moreThanThreeTags_rejectsWholeCommand() {
+        assertThrows(ShrekException.class, () -> Parser.parseTodo("play game #one #two #three #four"));
+    }
+
+    @Test
+    public void parseTags_multipleTags_returnsNormalizedTags() throws ShrekException {
+        assertEquals(java.util.List.of("#fun", "#school"), Parser.parseTags("#FUN #school"));
+    }
+
+    @Test
     public void parseTodo_emptyDescription_throwsShrekException() {
         assertThrows(ShrekException.class, () -> Parser.parseTodo(""));
     }
@@ -26,6 +54,18 @@ public class ParserTest {
     public void parseDeadline_validInput_createsDeadlineWithCorrectDate() throws ShrekException {
         Deadline deadline = Parser.parseDeadline("return book /by 2019-10-15");
         assertEquals("[D][ ] return book (by: Oct 15 2019)", deadline.toString());
+    }
+
+    @Test
+    public void parseDeadline_trailingTag_keepsDateParsingIntact() throws ShrekException {
+        Deadline deadline = Parser.parseDeadline("return book /by 2019-10-15 #school");
+        assertEquals(java.util.List.of("#school"), deadline.getTags());
+    }
+
+    @Test
+    public void parseEvent_trailingTag_keepsTimeParsingIntact() throws ShrekException {
+        Event event = Parser.parseEvent("party /from 2pm /to 4pm #fun");
+        assertEquals(java.util.List.of("#fun"), event.getTags());
     }
 
     @Test
