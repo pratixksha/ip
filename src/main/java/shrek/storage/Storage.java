@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import shrek.task.Deadline;
@@ -94,15 +95,23 @@ public class Storage {
             Task task;
             switch (type) {
                 case "T":
-                    task = new Todo(description);
+                    ArrayList<String> todoTags = parseStoredTags(parts, 3);
+                    if (todoTags == null) {
+                        return null;
+                    }
+                    task = new Todo(description, todoTags);
                     break;
                 case "D":
                     if (parts.length < 4) {
                         return null;
                     }
                     assert parts.length >= 4 : "A deadline record must contain a due date.";
+                    ArrayList<String> deadlineTags = parseStoredTags(parts, 4);
+                    if (deadlineTags == null) {
+                        return null;
+                    }
                     LocalDate by = LocalDate.parse(parts[3].trim());
-                    task = new Deadline(description, by);
+                    task = new Deadline(description, by, deadlineTags);
                     break;
                 case "E":
                     if (parts.length < 5) {
@@ -114,7 +123,11 @@ public class Storage {
                     if (from.isEmpty() || to.isEmpty()) {
                         return null;
                     }
-                    task = new Event(description, from, to);
+                    ArrayList<String> eventTags = parseStoredTags(parts, 5);
+                    if (eventTags == null) {
+                        return null;
+                    }
+                    task = new Event(description, from, to, eventTags);
                     break;
                 default:
                     return null;
@@ -124,10 +137,31 @@ public class Storage {
                 task.markAsDone();
             }
             return task;
-        } catch (ArrayIndexOutOfBoundsException | DateTimeParseException e) {
+        } catch (ArrayIndexOutOfBoundsException | DateTimeParseException | IllegalArgumentException e) {
             // Corrupted or malformed line — skip it rather than crash.
             return null;
         }
+    }
+
+    /**
+     * Parses the optional comma-separated tag field of a saved record.
+     *
+     * @param parts the fields in the saved record.
+     * @param firstOptionalField the index after the task's required fields.
+     * @return the parsed tags, an empty list for an old-format record, or null for an invalid shape.
+     */
+    private ArrayList<String> parseStoredTags(String[] parts, int firstOptionalField) {
+        if (parts.length == firstOptionalField) {
+            return new ArrayList<>();
+        }
+        if (parts.length != firstOptionalField + 1) {
+            return null;
+        }
+        String tagField = parts[firstOptionalField].trim();
+        if (tagField.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(Arrays.asList(tagField.split(",", -1)));
     }
 
     /**

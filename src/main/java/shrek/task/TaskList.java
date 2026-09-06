@@ -81,10 +81,10 @@ public class TaskList {
     }
 
     /**
-     * Returns a list of tasks whose description contains the given keyword.
-     * The match is case-insensitive.
+     * Returns a list of tasks whose description or tags contain the given keyword.
+     * The match is case-insensitive and substring-based.
      *
-     * @param keyword the search term to match against task descriptions.
+     * @param keyword the search term to match against task descriptions and tags.
      * @return a list of tasks matching the keyword.
      */
     public ArrayList<Task> find(String keyword) {
@@ -93,7 +93,9 @@ public class TaskList {
         return tasks.stream()
                 .filter(task -> {
                     assert task != null : "The task list invariant forbids null tasks.";
-                    return task.getDescription().toLowerCase().contains(lowerKeyword);
+                    String lowerDescription = task.getDescription().toLowerCase();
+                    String lowerTags = String.join(" ", task.getTags()).toLowerCase();
+                    return lowerDescription.contains(lowerKeyword) || lowerTags.contains(lowerKeyword);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }
