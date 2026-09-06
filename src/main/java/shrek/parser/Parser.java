@@ -21,6 +21,7 @@ public class Parser {
      * @return the matching command type, or UNKNOWN if unrecognized.
      */
     public static CommandType parseCommandType(String input) {
+        assert input != null : "The parser requires a command string.";
         String commandWord = input.split(" ", 2)[0];
         try {
             return CommandType.valueOf(commandWord.toUpperCase());
@@ -36,6 +37,7 @@ public class Parser {
      * @return the text following the command word, trimmed.
      */
     public static String parseArgs(String input) {
+        assert input != null : "The parser requires a command string.";
         String commandWord = input.split(" ", 2)[0];
         return input.length() > commandWord.length()
                 ? input.substring(commandWord.length()).trim()
@@ -52,6 +54,9 @@ public class Parser {
      * @throws ShrekException if the argument is missing, non-numeric, or out of range.
      */
     public static int parseTaskIndex(String args, String command, int taskCount) throws ShrekException {
+        assert args != null : "Task-index arguments must not be null.";
+        assert command != null && !command.isBlank() : "The command name must be available for errors.";
+        assert taskCount >= 0 : "A task count cannot be negative.";
         if (args.isEmpty()) {
             throw new ShrekException("OOPS!!! Please specify which task number to " + command + ".");
         }
@@ -65,6 +70,8 @@ public class Parser {
             throw new ShrekException("OOPS!!! That task number doesn't exist. You have "
                     + taskCount + " task(s) in your list.");
         }
+        // The range check above establishes the contract expected by TaskList.get/remove.
+        assert index >= 0 && index < taskCount : "Parsed task index must be in range.";
         return index;
     }
 
@@ -97,6 +104,8 @@ public class Parser {
             throw new ShrekException("OOPS!!! A deadline needs a '/by' followed by the due date.");
         }
         String[] parts = args.split("/by", 2);
+        // The delimiter check guarantees two sections for the positive-limit split.
+        assert parts.length == 2 : "A deadline must split into description and due date.";
         String description = parts[0].trim();
         String byText = parts[1].trim();
         if (description.isEmpty()) {
@@ -130,6 +139,8 @@ public class Parser {
             throw new ShrekException("OOPS!!! An event needs a '/from' followed by the start date/time.");
         }
         String[] fromSplit = args.split("/from", 2);
+        // The delimiter check guarantees two sections for the positive-limit split.
+        assert fromSplit.length == 2 : "An event must split at its start time.";
         String description = fromSplit[0].trim();
         if (description.isEmpty()) {
             throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
@@ -138,6 +149,8 @@ public class Parser {
             throw new ShrekException("OOPS!!! An event needs a '/to' followed by the end date/time.");
         }
         String[] toSplit = fromSplit[1].split("/to", 2);
+        // The delimiter check guarantees two sections for the positive-limit split.
+        assert toSplit.length == 2 : "An event must split into start and end times.";
         String from = toSplit[0].trim();
         String to = toSplit[1].trim();
         if (from.isEmpty()) {
