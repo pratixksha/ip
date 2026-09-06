@@ -80,18 +80,10 @@ public class Shrek {
                     return "Bye. Hope to see you again soon!";
                 case LIST:
                     return formatTaskList(tasks.getAll());
-                case MARK: {
-                    int index = Parser.parseTaskIndex(commandArgs, "mark", tasks.size());
-                    tasks.get(index).markAsDone();
-                    storage.save(tasks.getAll());
-                    return "Nice! I've marked this task as done:\n  " + tasks.get(index);
-                }
-                case UNMARK: {
-                    int index = Parser.parseTaskIndex(commandArgs, "unmark", tasks.size());
-                    tasks.get(index).markAsNotDone();
-                    storage.save(tasks.getAll());
-                    return "OK, I've marked this task as not done yet:\n  " + tasks.get(index);
-                }
+                case MARK:
+                    return updateTaskStatus(commandArgs, true);
+                case UNMARK:
+                    return updateTaskStatus(commandArgs, false);
                 case DELETE: {
                     int index = Parser.parseTaskIndex(commandArgs, "delete", tasks.size());
                     Task removed = tasks.remove(index);
@@ -124,6 +116,32 @@ public class Shrek {
         } catch (ShrekException e) {
             return e.getMessage();
         }
+    }
+
+    /**
+     * Updates a task's completion status, persists the change, and creates a response.
+     *
+     * @param commandArgs the argument text following the command.
+     * @param shouldBeDone whether the task should be marked as done.
+     * @return the confirmation response.
+     * @throws ShrekException if the task number is invalid.
+     */
+    private String updateTaskStatus(String commandArgs, boolean shouldBeDone) throws ShrekException {
+        String command = shouldBeDone ? "mark" : "unmark";
+        int index = Parser.parseTaskIndex(commandArgs, command, tasks.size());
+        Task task = tasks.get(index);
+
+        if (shouldBeDone) {
+            task.markAsDone();
+        } else {
+            task.markAsNotDone();
+        }
+
+        storage.save(tasks.getAll());
+        String response = shouldBeDone
+                ? "Nice! I've marked this task as done:"
+                : "OK, I've marked this task as not done yet:";
+        return response + "\n  " + task;
     }
 
     /**
