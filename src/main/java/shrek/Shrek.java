@@ -52,7 +52,7 @@ public class Shrek {
             String input = ui.readCommand();
             String response = getResponse(input);
             ui.showResponse(response);
-            if (Parser.parseCommandType(input) == CommandType.BYE) {
+            if (lastCommandType == CommandType.BYE) {
                 ui.close();
                 return;
             }
