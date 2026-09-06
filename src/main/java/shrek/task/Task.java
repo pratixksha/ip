@@ -13,6 +13,10 @@ public class Task {
      * @param description the text describing the task.
      */
     public Task(String description) {
+        // Parser validates descriptions before constructing tasks, so a blank
+        // description here indicates a programming error rather than bad user input.
+        assert description != null && !description.isBlank()
+                : "A task must have a non-blank description.";
         this.description = description;
         this.isDone = false;
     }

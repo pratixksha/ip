@@ -17,6 +17,9 @@ public class Event extends Task {
      */
     public Event(String description, String from, String to) {
         super(description);
+        // Parser supplies both times, and both are required by the save format.
+        assert from != null && !from.isBlank() : "An event must have a start time.";
+        assert to != null && !to.isBlank() : "An event must have an end time.";
         this.from = from;
         this.to = to;
     }
