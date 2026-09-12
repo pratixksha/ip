@@ -1,5 +1,7 @@
 package shrek.task;
 
+import java.util.Collection;
+
 /**
  * Represents a task that starts and ends at specific date/times.
  */
@@ -24,9 +26,26 @@ public class Event extends Task {
         this.to = to;
     }
 
+    /**
+     * Creates a new event task with tags.
+     *
+     * @param description the text describing the task.
+     * @param from        the start date/time of the event.
+     * @param to          the end date/time of the event.
+     * @param tags        the initial tags for the task.
+     */
+    public Event(String description, String from, String to, Collection<String> tags) {
+        super(description, tags);
+        assert from != null && !from.isBlank() : "An event must have a start time.";
+        assert to != null && !to.isBlank() : "An event must have an end time.";
+        this.from = from;
+        this.to = to;
+    }
+
     @Override
     public String toSaveFormat() {
-        return "E | " + (isDone ? "1" : "0") + " | " + description + " | " + from + " | " + to;
+        return "E | " + (isDone ? "1" : "0") + " | " + description + " | " + from + " | " + to
+                + getTagsStorageSuffix();
     }
 
     @Override

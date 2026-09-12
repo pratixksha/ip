@@ -87,9 +87,10 @@ public class DialogBox extends HBox {
             return;
         }
 
-        if (matchesAnyCommand(commandType, CommandType.TODO, CommandType.DEADLINE, CommandType.EVENT)) {
+        if (matchesAnyCommand(commandType, CommandType.TODO, CommandType.DEADLINE, CommandType.EVENT,
+                CommandType.TAG)) {
             dialog.getStyleClass().add("add-label");
-        } else if (matchesAnyCommand(commandType, CommandType.MARK, CommandType.UNMARK)) {
+        } else if (matchesAnyCommand(commandType, CommandType.MARK, CommandType.UNMARK, CommandType.UNTAG)) {
             dialog.getStyleClass().add("marked-label");
         } else if (matchesAnyCommand(commandType, CommandType.DELETE)) {
             dialog.getStyleClass().add("delete-label");
