@@ -31,6 +31,7 @@ public class Main extends Application {
 
             Scene scene = new Scene(root);
             stage.setTitle("Shrek Chatbot");
+            stage.setResizable(true);
             stage.setMinWidth(500);
             stage.setMinHeight(600);
             stage.setScene(scene);

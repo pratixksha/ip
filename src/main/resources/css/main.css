@@ -1,6 +1,5 @@
 .root {
-    main-color: rgb(237, 255, 242);
-    -fx-background-color: main-color;
+    -fx-background-color: #f3f5f8;
     -fx-background-image: url("../images/background.png");
     -fx-background-size: cover;
 }
@@ -40,16 +39,16 @@
 }
 
 .scroll-pane {
-    -fx-background-color: rgba(255, 255, 255, 0.35);
+    -fx-background-color: transparent;
     -fx-background-radius: 14px;
-    -fx-border-color: rgba(91, 44, 131, 0.28);
+    -fx-border-color: #dce2e9;
     -fx-border-radius: 14px;
-    -fx-padding: 4px;
+    -fx-padding: 0;
 }
 
 .scroll-pane .viewport {
-    -fx-background-color: rgba(255, 255, 255, 0.35);
-    -fx-background-radius: 10px;
+    -fx-background-color: rgba(255, 255, 255, 0.78);
+    -fx-background-radius: 14px;
 }
 
 .scroll-bar {
