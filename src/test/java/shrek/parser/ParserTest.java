@@ -5,12 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import shrek.CommandType;
 import shrek.ShrekException;
 import shrek.task.Deadline;
 import shrek.task.Event;
 import shrek.task.Todo;
 
 public class ParserTest {
+
+    @Test
+    public void parseCommand_normalizesWhitespace() {
+        assertEquals(CommandType.TODO, Parser.parseCommandType("  todo   read   book  "));
+        assertEquals("read book", Parser.parseArgs("  todo   read   book  "));
+    }
 
     @Test
     public void parseTodo_validDescription_createsTodo() throws ShrekException {
@@ -92,5 +99,41 @@ public class ParserTest {
     @Test
     public void parseTaskIndex_nonNumeric_throwsShrekException() {
         assertThrows(ShrekException.class, () -> Parser.parseTaskIndex("abc", "mark", 5));
+    }
+
+    @Test
+    public void parseTaskIndex_multipleNumbers_throwsShrekException() {
+        assertThrows(ShrekException.class, () -> Parser.parseTaskIndex("1 2", "mark", 5));
+    }
+
+    @Test
+    public void parseDeadline_duplicateByMarker_throwsShrekException() {
+        assertThrows(ShrekException.class, () -> Parser.parseDeadline(
+                "return book /by 2019-10-15 /by 2019-10-16"));
+    }
+
+    @Test
+    public void parseEvent_duplicateMarkers_throwsShrekException() {
+        assertThrows(ShrekException.class, () -> Parser.parseEvent(
+                "party /from 2pm /from 3pm /to 4pm"));
+        assertThrows(ShrekException.class, () -> Parser.parseEvent(
+                "party /from 2pm /to 4pm /to 5pm"));
+    }
+
+    @Test
+    public void parseEvent_invalidOrNonIncreasingTimes_throwsShrekException() {
+        assertThrows(ShrekException.class, () -> Parser.parseEvent(
+                "party /from 25:00 /to 26:00"));
+        assertThrows(ShrekException.class, () -> Parser.parseEvent(
+                "party /from 4pm /to 2pm"));
+        assertThrows(ShrekException.class, () -> Parser.parseEvent(
+                "party /from 2pm /to 2pm"));
+    }
+
+    @Test
+    public void parseEvent_isoDateTimes_areAccepted() throws ShrekException {
+        Event event = Parser.parseEvent(
+                "party /from 2026-09-13T14:00 /to 2026-09-13T15:00");
+        assertEquals("party", event.getDescription());
     }
 }

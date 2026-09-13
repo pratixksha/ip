@@ -7,8 +7,8 @@ import java.util.Collection;
  */
 public class Event extends Task {
 
-    protected String from;
-    protected String to;
+    protected EventTime from;
+    protected EventTime to;
 
     /**
      * Creates a new event task.
@@ -19,11 +19,9 @@ public class Event extends Task {
      */
     public Event(String description, String from, String to) {
         super(description);
-        // Parser supplies both times, and both are required by the save format.
-        assert from != null && !from.isBlank() : "An event must have a start time.";
-        assert to != null && !to.isBlank() : "An event must have an end time.";
-        this.from = from;
-        this.to = to;
+        this.from = EventTime.parse(from);
+        this.to = EventTime.parse(to);
+        validateOrder();
     }
 
     /**
@@ -36,20 +34,34 @@ public class Event extends Task {
      */
     public Event(String description, String from, String to, Collection<String> tags) {
         super(description, tags);
-        assert from != null && !from.isBlank() : "An event must have a start time.";
-        assert to != null && !to.isBlank() : "An event must have an end time.";
-        this.from = from;
-        this.to = to;
+        this.from = EventTime.parse(from);
+        this.to = EventTime.parse(to);
+        validateOrder();
     }
 
     @Override
     public String toSaveFormat() {
-        return "E | " + (isDone ? "1" : "0") + " | " + description + " | " + from + " | " + to
+        return "E | " + (isDone ? "1" : "0") + " | " + description + " | " + from.toStorageFormat()
+                + " | " + to.toStorageFormat()
                 + getTagsStorageSuffix();
     }
 
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
+    }
+
+    @Override
+    protected String getCanonicalDetails() {
+        return super.getCanonicalDetails() + "|" + from.toCanonicalValue() + "|" + to.toCanonicalValue();
+    }
+
+    private void validateOrder() {
+        if (from.hasDate() != to.hasDate()) {
+            throw new IllegalArgumentException("Event start and end must use the same date/time format.");
+        }
+        if (from.compareTo(to) >= 0) {
+            throw new IllegalArgumentException("Event end must be later than its start.");
+        }
     }
 }
