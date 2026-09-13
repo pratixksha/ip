@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="500.0"
             prefHeight="720.0" prefWidth="620.0" stylesheets="@../css/main.css"
             xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="shrek.MainWindow">
@@ -23,7 +23,8 @@
                     AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="12.0"
                     AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="12.0">
             <content>
-                <VBox fx:id="dialogContainer" fillWidth="true" prefWidth="570.0" />
+                <VBox fx:id="dialogContainer" fillWidth="true" maxWidth="1.7976931348623157E308"
+                      minWidth="0.0" prefWidth="570.0" />
             </content>
         </ScrollPane>
     </children>

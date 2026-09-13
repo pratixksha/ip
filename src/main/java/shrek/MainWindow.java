@@ -36,6 +36,10 @@ public class MainWindow extends AnchorPane {
     public void initialize() {
         dialogContainer.setSpacing(8);
         dialogContainer.setFillWidth(true);
+        dialogContainer.setMinWidth(0);
+        dialogContainer.setMaxWidth(Double.MAX_VALUE);
+        scrollPane.viewportBoundsProperty().addListener((observable, oldBounds, newBounds) ->
+                dialogContainer.setPrefWidth(newBounds.getWidth()));
         dialogContainer.heightProperty().addListener((observable, oldHeight, newHeight) -> scrollPane.setVvalue(1.0));
     }
 

@@ -1,21 +1,35 @@
-.label {
-    -fx-background-color: linear-gradient(to bottom right, #ffffff, #e6d4f4);
-    -fx-border-color: #8f63aa;
-    -fx-border-width: 1.5px;
-    -fx-background-radius: 15px 15px 3px 15px;
-    -fx-border-radius: 15px 15px 3px 15px;
-    -fx-border-insets: 0 7px 0 7px;
-    -fx-background-insets: 0 7px 0 7px;
-    -fx-padding: 9px 12px;
-    -fx-text-fill: #2a1537;
-    -fx-font: 14px "Arial";
+.dialog-row {
+    -fx-alignment: top-left;
+    -fx-spacing: 8px;
+}
+
+.message-label {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7dfe8;
+    -fx-border-width: 1px;
+    -fx-background-radius: 4px 14px 14px 14px;
+    -fx-border-radius: 4px 14px 14px 14px;
+    -fx-padding: 8px 12px;
+    -fx-text-fill: #26323d;
+    -fx-font-family: "System";
+    -fx-font-size: 14px;
+}
+
+.user-dialog {
+    -fx-alignment: top-right;
+}
+
+.user-dialog .message-label {
+    -fx-background-color: #e9edf2;
+    -fx-border-color: #c7d0da;
+    -fx-background-radius: 14px 14px 4px 14px;
+    -fx-border-radius: 14px 14px 4px 14px;
+    -fx-text-fill: #33404c;
 }
 
 .reply-label {
-    -fx-background-color: linear-gradient(to bottom right, #effff6, #c9efd9);
-    -fx-background-radius: 15px 15px 15px 3px;
-    -fx-border-radius: 15px 15px 15px 3px;
-    -fx-border-color: #4f9b76;
+    -fx-background-color: #f7fbff;
+    -fx-border-color: #b8c9d8;
 }
 
 .add-label {
@@ -34,11 +48,20 @@
 }
 
 .error-label {
-    -fx-background-color: #ffe0e0;
-    -fx-border-color: #c0392b;
-    -fx-text-fill: #8b1e16;
+    -fx-background-color: #fff0eb;
+    -fx-border-color: #e4572e;
+    -fx-border-width: 2px;
+    -fx-text-fill: #8f2918;
+}
+
+.error-indicator {
+    -fx-text-fill: #c63f1d;
+    -fx-font-family: "System";
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 4px 0 4px;
 }
 
 #displayPicture {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 8, 0.35, 2, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.20), 5, 0.25, 1, 1);
 }

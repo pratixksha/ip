@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 /**
  * A reusable chat message control backed by {@code DialogBox.fxml}.
@@ -24,6 +26,12 @@ public class DialogBox extends HBox {
 
     @FXML
     private ImageView displayPicture;
+
+    @FXML
+    private Label errorIndicator;
+
+    @FXML
+    private VBox messageContent;
 
     /**
      * Loads a dialog box from FXML and fills it with the supplied content.
@@ -43,6 +51,7 @@ public class DialogBox extends HBox {
 
         dialog.setText(text);
         displayPicture.setImage(image);
+        getStyleClass().add("dialog-row");
     }
 
     /** Moves the avatar to the left and gives the reply bubble its own style. */
@@ -51,6 +60,8 @@ public class DialogBox extends HBox {
         Collections.reverse(reversedChildren);
         getChildren().setAll(reversedChildren);
         setAlignment(Pos.TOP_LEFT);
+        HBox.setHgrow(messageContent, Priority.ALWAYS);
+        messageContent.setMaxWidth(Double.MAX_VALUE);
         dialog.getStyleClass().add("reply-label");
     }
 
@@ -62,7 +73,11 @@ public class DialogBox extends HBox {
      * @return a dialog box aligned to the right.
      */
     public static DialogBox getUserDialog(String text, Image image) {
-        return new DialogBox(text, image);
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.getStyleClass().add("user-dialog");
+        HBox.setHgrow(dialogBox.messageContent, Priority.NEVER);
+        dialogBox.messageContent.maxWidthProperty().bind(dialogBox.widthProperty().multiply(0.72));
+        return dialogBox;
     }
 
     /**
@@ -75,6 +90,7 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getShrekDialog(String text, Image image, CommandType commandType) {
         DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.getStyleClass().add("shrek-dialog");
         dialogBox.flip();
         dialogBox.changeDialogStyle(text, commandType);
         return dialogBox;
@@ -82,7 +98,11 @@ public class DialogBox extends HBox {
 
     /** Applies the Part 5 response colors to relevant command results. */
     private void changeDialogStyle(String response, CommandType commandType) {
-        if (response.startsWith("OOPS")) {
+        boolean isError = response.startsWith("OOPS");
+        errorIndicator.setManaged(isError);
+        errorIndicator.setVisible(isError);
+
+        if (isError) {
             dialog.getStyleClass().add("error-label");
             return;
         }
