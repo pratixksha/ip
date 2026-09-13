@@ -44,4 +44,25 @@ public class ShrekTest {
         assertEquals("Here are the matching tasks in your list:\n  1. [T][ ] play game #weekend",
                 shrek.getResponse("find week"));
     }
+
+    @Test
+    public void listAndBye_rejectArguments() {
+        Shrek shrek = new Shrek(tempDir.resolve("shrek.txt").toString());
+
+        assertEquals("OOPS!!! The 'list' command does not accept arguments.",
+                shrek.getResponse("  list   extra  "));
+        assertEquals("OOPS!!! The 'bye' command does not accept arguments.",
+                shrek.getResponse(" bye now "));
+    }
+
+    @Test
+    public void addDuplicateTask_rejectsCanonicalDuplicate() {
+        Shrek shrek = new Shrek(tempDir.resolve("shrek.txt").toString());
+        assertEquals("Got it. I've added this task:\n  [T][ ] Read Book #a #b\n"
+                + "Now you have 1 tasks in the list.",
+                shrek.getResponse("todo  Read   Book #B #A"));
+
+        assertEquals("OOPS!!! This task already exists in your list.",
+                shrek.getResponse("todo read book #a #b"));
+    }
 }

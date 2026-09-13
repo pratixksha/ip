@@ -9,6 +9,7 @@ import shrek.CommandType;
 import shrek.ShrekException;
 import shrek.task.Deadline;
 import shrek.task.Event;
+import shrek.task.EventTime;
 import shrek.task.Task;
 import shrek.task.Todo;
 
@@ -31,14 +32,28 @@ public class Parser {
     }
 
     /**
+     * Trims a command and treats any run of whitespace as one separator.
+     *
+     * @param input the raw command entered by the user.
+     * @return the normalized command.
+     */
+    public static String normalizeInput(String input) {
+        assert input != null : "The parser requires a command string.";
+        return input.trim().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Determines the command type from the first word of the input.
      *
      * @param input the raw user input line.
      * @return the matching command type, or UNKNOWN if unrecognized.
      */
     public static CommandType parseCommandType(String input) {
-        assert input != null : "The parser requires a command string.";
-        String commandWord = input.split(" ", 2)[0];
+        String normalizedInput = normalizeInput(input);
+        if (normalizedInput.isEmpty()) {
+            return CommandType.UNKNOWN;
+        }
+        String commandWord = normalizedInput.split(" ", 2)[0];
         try {
             return CommandType.valueOf(commandWord.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -53,10 +68,13 @@ public class Parser {
      * @return the text following the command word, trimmed.
      */
     public static String parseArgs(String input) {
-        assert input != null : "The parser requires a command string.";
-        String commandWord = input.split(" ", 2)[0];
-        return input.length() > commandWord.length()
-                ? input.substring(commandWord.length()).trim()
+        String normalizedInput = normalizeInput(input);
+        if (normalizedInput.isEmpty()) {
+            return "";
+        }
+        String commandWord = normalizedInput.split(" ", 2)[0];
+        return normalizedInput.length() > commandWord.length()
+                ? normalizedInput.substring(commandWord.length()).trim()
                 : "";
     }
 
@@ -70,15 +88,18 @@ public class Parser {
      * @throws ShrekException if the argument is missing, non-numeric, or out of range.
      */
     public static int parseTaskIndex(String args, String command, int taskCount) throws ShrekException {
-        assert args != null : "Task-index arguments must not be null.";
+        String normalizedArgs = normalizeInput(args);
         assert command != null && !command.isBlank() : "The command name must be available for errors.";
         assert taskCount >= 0 : "A task count cannot be negative.";
-        if (args.isEmpty()) {
+        if (normalizedArgs.isEmpty()) {
             throw new ShrekException("OOPS!!! Please specify which task number to " + command + ".");
+        }
+        if (!normalizedArgs.matches("\\d+")) {
+            throw new ShrekException("OOPS!!! The task number must be a single valid number.");
         }
         int index;
         try {
-            index = Integer.parseInt(args) - 1;
+            index = Integer.parseInt(normalizedArgs) - 1;
         } catch (NumberFormatException e) {
             throw new ShrekException("OOPS!!! The task number must be a valid number.");
         }
@@ -100,7 +121,7 @@ public class Parser {
      */
     public static ParsedTaskArgs parseTaskArgs(String args) throws ShrekException {
         assert args != null : "Task arguments must not be null.";
-        String trimmedArgs = args.trim();
+        String trimmedArgs = normalizeInput(args);
         if (trimmedArgs.isEmpty()) {
             return new ParsedTaskArgs("", List.of());
         }
@@ -132,7 +153,7 @@ public class Parser {
      */
     public static ArrayList<String> parseTags(String args) throws ShrekException {
         assert args != null : "Tag arguments must not be null.";
-        String trimmedArgs = args.trim();
+        String trimmedArgs = normalizeInput(args);
         if (trimmedArgs.isEmpty()) {
             throw new ShrekException("OOPS!!! Please specify at least one tag.");
         }
@@ -202,8 +223,12 @@ public class Parser {
         if (parsedArgs.description().isEmpty()) {
             throw new ShrekException("OOPS!!! The description of a deadline cannot be empty.");
         }
-        if (!parsedArgs.description().contains("/by")) {
+        int byMarkerCount = countOccurrences(parsedArgs.description(), "/by");
+        if (byMarkerCount == 0) {
             throw new ShrekException("OOPS!!! A deadline needs a '/by' followed by the due date.");
+        }
+        if (byMarkerCount > 1) {
+            throw new ShrekException("OOPS!!! A deadline can contain only one '/by' marker.");
         }
         String[] parts = parsedArgs.description().split("/by", 2);
         // The delimiter check guarantees two sections for the positive-limit split.
@@ -238,8 +263,13 @@ public class Parser {
         if (parsedArgs.description().isEmpty()) {
             throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
         }
-        if (!parsedArgs.description().contains("/from")) {
+        int fromMarkerCount = countOccurrences(parsedArgs.description(), "/from");
+        int toMarkerCount = countOccurrences(parsedArgs.description(), "/to");
+        if (fromMarkerCount == 0) {
             throw new ShrekException("OOPS!!! An event needs a '/from' followed by the start date/time.");
+        }
+        if (fromMarkerCount > 1) {
+            throw new ShrekException("OOPS!!! An event can contain only one '/from' marker.");
         }
         String[] fromSplit = parsedArgs.description().split("/from", 2);
         // The delimiter check guarantees two sections for the positive-limit split.
@@ -248,8 +278,11 @@ public class Parser {
         if (description.isEmpty()) {
             throw new ShrekException("OOPS!!! The description of an event cannot be empty.");
         }
-        if (!fromSplit[1].contains("/to")) {
+        if (toMarkerCount == 0) {
             throw new ShrekException("OOPS!!! An event needs a '/to' followed by the end date/time.");
+        }
+        if (toMarkerCount > 1) {
+            throw new ShrekException("OOPS!!! An event can contain only one '/to' marker.");
         }
         String[] toSplit = fromSplit[1].split("/to", 2);
         // The delimiter check guarantees two sections for the positive-limit split.
@@ -262,6 +295,34 @@ public class Parser {
         if (to.isEmpty()) {
             throw new ShrekException("OOPS!!! The end date/time of an event cannot be empty.");
         }
-        return new Event(description, from, to, parsedArgs.tags());
+        EventTime fromTime = parseEventTime(from, "start");
+        EventTime toTime = parseEventTime(to, "end");
+        if (fromTime.hasDate() != toTime.hasDate()) {
+            throw new ShrekException("OOPS!!! Event start and end must use the same date/time format.");
+        }
+        if (fromTime.compareTo(toTime) >= 0) {
+            throw new ShrekException("OOPS!!! The event end must be later than its start.");
+        }
+        return new Event(description, fromTime.toStorageFormat(), toTime.toStorageFormat(), parsedArgs.tags());
+    }
+
+    private static EventTime parseEventTime(String value, String label) throws ShrekException {
+        try {
+            return EventTime.parse(value);
+        } catch (IllegalArgumentException e) {
+            throw new ShrekException("OOPS!!! Please enter a valid event " + label
+                    + " time (e.g. 2pm, 14:00, or 2026-09-13T14:00).");
+        }
+    }
+
+    private static int countOccurrences(String input, String marker) {
+        int count = 0;
+        int searchFrom = 0;
+        int markerPosition;
+        while ((markerPosition = input.indexOf(marker, searchFrom)) >= 0) {
+            count++;
+            searchFrom = markerPosition + marker.length();
+        }
+        return count;
     }
 }

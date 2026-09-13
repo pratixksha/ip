@@ -75,15 +75,22 @@ public class Shrek {
     public String getResponse(String input) {
         assert input != null : "Shrek requires a command string.";
         assert tasks != null : "Shrek must have a task list before processing commands.";
-        String commandArgs = Parser.parseArgs(input);
-        CommandType command = Parser.parseCommandType(input);
+        String normalizedInput = Parser.normalizeInput(input);
+        String commandArgs = Parser.parseArgs(normalizedInput);
+        CommandType command = Parser.parseCommandType(normalizedInput);
         lastCommandType = command;
 
         try {
             switch (command) {
                 case BYE:
+                    if (!commandArgs.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The 'bye' command does not accept arguments.");
+                    }
                     return "Bye. Hope to see you again soon!";
                 case LIST:
+                    if (!commandArgs.isEmpty()) {
+                        throw new ShrekException("OOPS!!! The 'list' command does not accept arguments.");
+                    }
                     return formatTaskList(tasks.getAll());
                 case MARK:
                     return updateTaskStatus(commandArgs, true);
@@ -214,7 +221,10 @@ public class Shrek {
      * @param task the task to add.
      * @return the confirmation response for the newly added task.
      */
-    private String addTaskAndGetResponse(Task task) {
+    private String addTaskAndGetResponse(Task task) throws ShrekException {
+        if (tasks.getAll().stream().anyMatch(existingTask -> existingTask.hasSameDetailsAs(task))) {
+            throw new ShrekException("OOPS!!! This task already exists in your list.");
+        }
         tasks.add(task);
         storage.save(tasks.getAll());
         return "Got it. I've added this task:\n  " + task

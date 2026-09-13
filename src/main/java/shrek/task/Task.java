@@ -132,6 +132,30 @@ public class Task {
     }
 
     /**
+     * Checks whether two tasks describe the same logical task, ignoring completion status.
+     *
+     * @param other the task to compare with this task.
+     * @return true when both tasks have the same type and canonical details.
+     */
+    public boolean hasSameDetailsAs(Task other) {
+        return other != null && getClass().equals(other.getClass())
+                && getCanonicalDetails().equals(other.getCanonicalDetails());
+    }
+
+    /**
+     * Builds the canonical details used to detect duplicate tasks.
+     *
+     * @return normalized description and sorted tags.
+     */
+    protected String getCanonicalDetails() {
+        return normalizeDescription(description) + "|" + String.join(",", tags);
+    }
+
+    private static String normalizeDescription(String value) {
+        return value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+    }
+
+    /**
      * Returns tags formatted for display after a task description.
      *
      * @return a space-separated tag string, or an empty string.
