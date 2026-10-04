@@ -6,14 +6,18 @@ Tasks are saved automatically in `data/shrek.txt`.
 
 ## Getting started
 
-From the project directory, run:
+1. Make sure Java `25` is installed on your computer.
+2. Place `Shrek.jar` in a folder of your choice.
+3. Open a new terminal window in that folder.
+4. Run:
 
 ```bash
-./gradlew run
+java -jar Shrek.jar
 ```
 
-On Windows, run `gradlew.bat run` instead. The application opens with an
-empty task list if no saved data exists.
+5. The Shrek GUI should open.
+6. Enter a command in the command box and press **Enter** or click **Send**.
+7. Refer to the command summary and features below for the available commands.
 
 ## Commands
 
